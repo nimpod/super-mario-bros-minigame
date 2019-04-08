@@ -8,7 +8,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         self.width = 23
         self.height = 34
-        self.velocity = 2
+        self.velocity = 3
         self.dx = self.velocity
         self.dy = self.velocity
         self.username = ""
@@ -20,7 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.setImage(Utils.bombImages[self.imagenum])
         self.rect = self.image.get_rect()
 
-        self.radius = (self.width+self.height)//5
+        self.radius = (self.width+self.height)//6
         # pygame.draw.circle(self.image, (0,0,0), self.rect.center, self.radius)    # Draw the players hitbox
         
         self.rect.center = (x,y)
