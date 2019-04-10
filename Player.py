@@ -1,5 +1,5 @@
 import pygame
-import os
+from os import path
 import Utils
 
 
@@ -12,6 +12,7 @@ class Player(pygame.sprite.Sprite):
         self.dx = self.velocity
         self.dy = self.velocity
         self.username = ""
+        self.score = 0
 
         self.imagenum = 1
         self.oldTime = 0
@@ -19,10 +20,8 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.setImage(Utils.bombImages[self.imagenum])
         self.rect = self.image.get_rect()
-
-        self.radius = (self.width+self.height)//6
+        self.radius = (self.width+self.height)//10
         # pygame.draw.circle(self.image, (0,0,0), self.rect.center, self.radius)    # Draw the players hitbox
-        
         self.rect.center = (x,y)
 
 
@@ -31,9 +30,12 @@ class Player(pygame.sprite.Sprite):
             if (self.imagenum == 0):
                 self.imagenum = 1
             elif (self.imagenum == 1):
-                self.imagenum = 0
+                self.imagenum = 0            
             self.setImage(Utils.bombImages[self.imagenum])
             self.oldTime = totalTime
+
+            # also make the bip-bob player sound whenever the animation changes            
+            Utils.playerSound.play()
 
 
     def setImage(self, newImg):
@@ -70,3 +72,6 @@ class Player(pygame.sprite.Sprite):
     @property
     def getHeight(self):
         return self.height
+    
+    def setScore(self, updatedScore):
+        self.score = updatedScore
