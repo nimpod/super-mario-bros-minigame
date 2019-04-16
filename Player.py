@@ -5,13 +5,13 @@ import Utils
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, username):
         self.width = 23
         self.height = 34
-        self.velocity = 3
+        self.velocity = 3.0
         self.dx = self.velocity
         self.dy = self.velocity
-        self.username = ""
+        self.username = username
         self.score = 0
 
         self.imagenum = 1

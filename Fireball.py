@@ -53,12 +53,6 @@ class Fireball(pygame.sprite.Sprite):
         if (self.rect.top > Utils.windowHeight+self.radius*2) or (self.rect.bottom < Utils.windowHeight/2.0 -self.radius*2) or (self.rect.right < -self.radius*2) or (self.rect.left > Utils.windowWidth+self.radius*2):
             self.respawn()
 
-
-    def increaseVelocity(self):
-        if (self.velocity <= 4.0):
-            self.velocity += 0.1
-
-
     @property
     def quadrants(self):
         return [ "UPPER", "RIGHT", "LOWER", "LEFT" ]

@@ -7,10 +7,10 @@ FPS = 60
 windowWidth = 400
 windowHeight = 600
 title = "Danger, Bob-Omb!"
-fireballCounter = 5
+fireballCounter = 3
 fireballStartingVelocity = 1.0
-
 window = pygame.display.set_mode((windowWidth, windowHeight))
+allSprites = pygame.sprite.Group()
 
 
 ''' SETUP ASSETS FOLDERS '''
@@ -22,8 +22,9 @@ style2 = path.join(imgFolder, "style2")
 
 ''' LOAD IN IMAGES '''
 background = pygame.image.load(path.join(imgFolder, "background.png")).convert()
-fireball = pygame.image.load(path.join(imgFolder, "fireball.png")).convert()
-bowser = pygame.image.load(path.join(imgFolder, "bowser.png")).convert()
+fireball =   pygame.image.load(path.join(imgFolder, "fireball.png")).convert()
+bowser =     pygame.image.load(path.join(imgFolder, "bowser.png")).convert()
+bowserFire = pygame.image.load(path.join(imgFolder, "bowser_fire.png")).convert()
 
 bombImages = []
 bombImagesList = [ 'bomb1.png', 'bomb2.png' ]
@@ -33,7 +34,7 @@ for img in bombImagesList:
 
 ''' LOAD IN SOUND / MUSIC '''
 pygame.mixer.music.load(path.join(sndFolder, 'game_music.wav'))
-pygame.mixer.music.set_volume(0.4)
+pygame.mixer.music.set_volume(0.9)
 
 playerSound = pygame.mixer.Sound(path.join(sndFolder, 'player_sound.wav'))
 playerSound.set_volume(0.1)
@@ -42,11 +43,10 @@ playerExplosion = pygame.mixer.Sound(path.join(sndFolder, 'player_explosion.wav'
 playerExplosion.set_volume(0.9)
 
 
-
 # Function to draw to text to the screen. You define the position, colour and font size of the text
-def textToScreen(window, text, x, y, fontColor, fontSize):
+def textToScreen(window, text, x, y, fontSize):
     text = str(text)
     font = pygame.font.SysFont('perpetua', fontSize)
     font.set_bold(True)
-    text = font.render(text, True, fontColor)
+    text = font.render(text, True, (255,255,255))
     window.blit(text, (x,y))
