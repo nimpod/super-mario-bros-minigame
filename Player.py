@@ -24,7 +24,6 @@ class Player(pygame.sprite.Sprite):
         # pygame.draw.circle(self.image, (0,0,0), self.rect.center, self.radius)    # Draw the players hitbox
         self.rect.center = (x,y)
 
-
     def animate(self, updateEvery, totalTime):
         if (totalTime - self.oldTime >= updateEvery):
             if (self.imagenum == 0):
@@ -35,7 +34,8 @@ class Player(pygame.sprite.Sprite):
             self.oldTime = totalTime
 
             # also make the bip-bob player sound whenever the animation changes            
-            Utils.playerSound.play()
+            if Utils.playermoving == True:
+                Utils.playerSound.play()
 
 
     def setImage(self, newImg):

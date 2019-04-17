@@ -11,6 +11,8 @@ fireballCounter = 3
 fireballStartingVelocity = 1.0
 window = pygame.display.set_mode((windowWidth, windowHeight))
 allSprites = pygame.sprite.Group()
+bowserFires = pygame.sprite.Group()
+playermoving = False
 
 
 ''' SETUP ASSETS FOLDERS '''
@@ -27,7 +29,7 @@ bowser =     pygame.image.load(path.join(imgFolder, "bowser.png")).convert()
 bowserFire = pygame.image.load(path.join(imgFolder, "bowser_fire.png")).convert()
 
 bombImages = []
-bombImagesList = [ 'bomb1.png', 'bomb2.png' ]
+bombImagesList = [ 'bomb01.png', 'bomb02.png' ]
 for img in bombImagesList:
     bombImages.append(pygame.image.load(path.join(imgFolder, img)).convert())
 

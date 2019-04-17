@@ -1,7 +1,5 @@
 def gameLoop(window, running):
     fireballVelocity = Utils.fireballStartingVelocity
-    bowserMoving = False
-    bowserShooting = False
 
     scores_dict = updateScoresDict()    
 
@@ -13,6 +11,11 @@ def gameLoop(window, running):
         
         ''' PLAYER MOVEMENT '''
         keys = pygame.key.get_pressed()
+        if (keys[pygame.K_w] or keys[pygame.K_s] or keys[pygame.K_a] or keys[pygame.K_d]):
+            Utils.playerMoving = True
+        else:
+            Utils.playermoving = False
+        
         if (keys[pygame.K_w]) and (player1.getY > windowHeight//2):
             player1.moveUp()
         if (keys[pygame.K_s]) and (player1.getY < windowHeight - player1.getHeight):
@@ -34,7 +37,7 @@ def gameLoop(window, running):
         now = pygame.time.get_ticks()   # total run time of program (milliseconds)
         if (now < gap):
             last = 0
-        if (now - last >= gap and bowserMoving == False):         # if 7 seconds have passed and bowser is not moving...
+        if (now - last >= gap):         # if 7 seconds have passed and bowser is not moving...
             # spawn a new fireball
             f = Fireball.Fireball()
             allSprites.add(f)
@@ -47,8 +50,6 @@ def gameLoop(window, running):
                     fireball.setVelocity(fireballVelocity)
             
             last = pygame.time.get_ticks()
-        
-        bowserFires = bowser.getFires()
 
         ''' DISPLAY SCORE INFORMATION '''
         # write current player score to screen
@@ -105,7 +106,7 @@ def update(window, allSprites):
 
 def render(window, allSprites):
     window.fill((0,0,0))        # reset background after each tick
-    window.blit(background, background_rect)
+    window.blit(background, background_rect)    
     allSprites.draw(window)
 
 
@@ -164,17 +165,15 @@ title = Utils.title
 background = Utils.background
 numberOfFireballs = Utils.fireballCounter
 allSprites = Utils.allSprites
+bowserFires = Utils.bowserFires
 
 # Setup the game
 pygame.init()
 pygame.mixer.init()
 clock = pygame.time.Clock()
-
 pygame.display.set_caption(title)
-
 background_rect = background.get_rect()
 background = pygame.transform.scale(background, (windowWidth, windowHeight))
-
 
 # Create the player and center them in middle of screen
 player1 = Player.Player(windowWidth//2, windowHeight//2 + windowHeight//4, "Nathan")
@@ -190,6 +189,8 @@ for i in range (numberOfFireballs):
     f = Fireball.Fireball()
     allSprites.add(f)
     fireballs.add(f)
+
+bowserFires = pygame.sprite.Group()
 
 # Run the game
 running = True
