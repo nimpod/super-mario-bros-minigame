@@ -52,6 +52,12 @@ class Player(pygame.sprite.Sprite):
     def setScore(self, updatedScore):
         self.score = updatedScore
 
+    def setX(self, newX):
+        self.rect.x = newX
+
+    def setY(self, newY):
+        self.rect.y = newY
+
     # MOVE PLAYER
     def moveUp(self):
         self.rect.y -= self.dy

@@ -145,7 +145,14 @@ while running:
     clock.tick(FPS)
     pygame.event.pump()
     
-    ''' PLAYER MOVEMENT '''
+    ''' PLAYER MOVEMENT - touchscreen|mouse '''
+    for e in pygame.event.get():
+        if e.type == pygame.MOUSEMOTION:
+            mx, my = pygame.mouse.get_pos()
+            player1.setX(mx)
+            player1.setY(my)
+
+    ''' PLAYER MOVEMENT - keyboard '''
     keys = pygame.key.get_pressed()
     if player1.alive() and (keys[pygame.K_w] or keys[pygame.K_s] or keys[pygame.K_a] or keys[pygame.K_d]):
         player1.setMoving(True)
@@ -159,7 +166,7 @@ while running:
             player1.moveRight()
     else:
         player1.setMoving(False)
-    
+
     ''' PLAYER ANIMATION '''
     updateEvery = 150               # waiting time until next player animation (milliseconds)
     player1.animate(updateEvery, pygame.time.get_ticks())
@@ -167,11 +174,8 @@ while running:
     update(window, allSprites)
     render(window, allSprites)
 
-
     ''' EVERY 7 SECONDS, UP THE LEVEL OF DIFFICULTY '''
-    now = pygame.time.get_ticks()   # total run time of program (milliseconds)
-
-    # increase difficulty of game...
+    now = pygame.time.get_ticks()
     if (now - lastGameDifficultyUpdate >= updateDifficulty):
         # spawn a new fireball
         f = Fireball.Fireball(fireballVelocity)
