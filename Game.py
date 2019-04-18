@@ -1,5 +1,8 @@
 def gameLoop(window, running):
     fireballVelocity = Utils.fireballStartingVelocity
+    firstShotTime = 0
+    firstShot = True
+    lastShot = pygame.time.get_ticks()
 
     scores_dict = updateScoresDict()    
 
@@ -32,6 +35,7 @@ def gameLoop(window, running):
         update(window, allSprites)
         render(window, allSprites)
 
+
         ''' EVERY 7 SECONDS, UP THE LEVEL OF DIFFICULTY '''
         gap = 7000                      # waiting time until next level of difficulty (milliseconds)
         now = pygame.time.get_ticks()   # total run time of program (milliseconds)
@@ -51,6 +55,47 @@ def gameLoop(window, running):
             
             last = pygame.time.get_ticks()
 
+        now = pygame.time.get_ticks()
+
+        #print("moving(", bowser.getRectX() ,"-->",bowser.getNewX(), ") = ", bowser.getMoving(), " : shooting(", bowser.getRectX() ,") = ", bowser.getShooting(), " : ", bowser.direction())
+
+        ''' BOWSER MOVEMENT '''
+        # if bowser is not moving and not shooting
+        if (not bowser.getMoving() and (not bowser.getShooting())):
+            bowser.setNewX(bowser.generateNewX())
+            bowser.setMoving(True)
+            print("CHOOSING NEW X")
+        
+        if bowser.getMoving():
+            bowser.move()
+
+            # if bowser is moving and reached its destination
+            if (bowser.getRectX() == bowser.getNewX()):
+                print("ARRIVED AT X(", bowser.getNewX(), ")")
+                bowser.setMoving(False)
+                bowser.setShooting(True)
+                firstShotTime = pygame.time.get_ticks()
+
+        if firstShot:
+            firstShotTime = pygame.time.get_ticks()
+        now = pygame.time.get_ticks()
+        timeShooting = 6000
+        shotDelay = 150
+
+        # bowser shoots
+        if (bowser.getShooting() and now - firstShotTime <= timeShooting):
+            if (now - lastShot >= shotDelay or firstShot):
+                f = Enemy.Fire(bowser.getRectX() +   bowser.getWidth()//2.5, bowser.getRectY() +bowser.getHeight()//2.5)
+                allSprites.add(f)
+                bowserFires.add(f)
+                lastShot = pygame.time.get_ticks()
+                firstShot = False
+        else:
+            now = pygame.time.get_ticks()
+            if (now - lastShot > 3000):
+                bowser.setShooting(False)
+
+
         ''' DISPLAY SCORE INFORMATION '''
         # write current player score to screen
         player1.setScore(int(pygame.time.get_ticks()) / 16.7)
@@ -68,12 +113,6 @@ def gameLoop(window, running):
 
         Utils.textToScreen(window, "High Score", 15, 15, 15)
         Utils.textToScreen(window, str(hiscore), 100, 5, 25)
-        
-
-        ''' END GAME '''
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
 
 
         ''' GAME OVER '''
@@ -81,6 +120,7 @@ def gameLoop(window, running):
         bowserFireCollision = pygame.sprite.spritecollide(player1, bowserFires, False, pygame.sprite.collide_circle)
 
         if (fireballCollision or bowserFireCollision):
+            player1.setDead(True)
             Utils.playerExplosion.play()            
             with open('super-mario-bros-minigame/scores.csv', 'a', newline='') as csvfile:
                 csv_writer = csv.writer(csvfile)
@@ -88,6 +128,12 @@ def gameLoop(window, running):
 
             # printScores(scores_dict)                  # print out the scores_dict row-by-row
             running = False
+
+
+        ''' END GAME '''
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
 
         ''' DEBUGGING '''

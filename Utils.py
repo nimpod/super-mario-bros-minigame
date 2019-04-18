@@ -32,11 +32,13 @@ bombImages = []
 bombImagesList = [ 'bomb01.png', 'bomb02.png' ]
 for img in bombImagesList:
     bombImages.append(pygame.image.load(path.join(imgFolder, img)).convert())
+    
+bombdead = pygame.image.load(path.join(imgFolder, "bombdead.png")).convert()
 
 
 ''' LOAD IN SOUND / MUSIC '''
 pygame.mixer.music.load(path.join(sndFolder, 'game_music.wav'))
-pygame.mixer.music.set_volume(0.9)
+pygame.mixer.music.set_volume(0.4)
 
 playerSound = pygame.mixer.Sound(path.join(sndFolder, 'player_sound.wav'))
 playerSound.set_volume(0.1)

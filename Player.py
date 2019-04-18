@@ -13,6 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.dy = self.velocity
         self.username = username
         self.score = 0
+        self.dead = False
 
         self.imagenum = 1
         self.oldTime = 0
@@ -25,7 +26,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = (x,y)
 
     def animate(self, updateEvery, totalTime):
-        if (totalTime - self.oldTime >= updateEvery):
+        if (totalTime - self.oldTime >= updateEvery and self.dead == False):
             if (self.imagenum == 0):
                 self.imagenum = 1
             elif (self.imagenum == 1):
@@ -36,6 +37,9 @@ class Player(pygame.sprite.Sprite):
             # also make the bip-bob player sound whenever the animation changes            
             if Utils.playermoving == True:
                 Utils.playerSound.play()
+
+        elif (self.dead == True):
+            self.setImage(Utils.bombdead)
 
 
     def setImage(self, newImg):
@@ -72,6 +76,9 @@ class Player(pygame.sprite.Sprite):
     @property
     def getHeight(self):
         return self.height
-    
+
+    def setDead(self, dead):
+        self.dead = dead
+
     def setScore(self, updatedScore):
         self.score = updatedScore
