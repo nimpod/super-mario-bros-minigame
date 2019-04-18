@@ -7,16 +7,8 @@ import operator
 
 import Player
 import Fireball
-import Utils
+from Utils import *
 import Enemy
-
-# Get variables from Utils.py
-windowWidth = Utils.windowWidth
-windowHeight = Utils.windowHeight
-FPS = Utils.FPS
-title = Utils.title
-background = Utils.background
-numberOfFireballs = Utils.fireballCounter
 
 # Setup the game
 pygame.mixer.pre_init(44100, -16, 2, 2048)
@@ -79,11 +71,11 @@ def displayMainMenu():
     window.blit(background, background_rect)
 
     # play the menu music
-    Utils.playMusic('menu_music.wav', 0.4)
+    playMusic('menu_music.wav', 0.4)
 
     # write text to screen
-    Utils.textToScreen(window, "Danger Bob-Omb!", 35, windowHeight/8 +10, 40)
-    Utils.textToScreen(window, "Press any key to begin", windowWidth/4, windowHeight - 20, 18)
+    textToScreen(window, "Danger Bob-Omb!", 35, windowHeight/8 +10, 40)
+    textToScreen(window, "Press any key to begin", windowWidth/4, windowHeight - 20, 18)
     pygame.display.flip()
     waiting = True
     while waiting:
@@ -93,7 +85,7 @@ def displayMainMenu():
                 pygame.quit()
             if event.type == pygame.KEYUP:
                 waiting = False
-                Utils.playMusic('game_music.wav', 0.4)
+                playMusic('game_music.wav', 0.4)
 
 
 ''' GAME LOOP '''
@@ -102,12 +94,22 @@ while running:
         displayMainMenu()
         gameOver = False
 
-        # other game setup things
-        fireballVelocity = Utils.fireballStartingVelocity
+        # initialise fireball variables
+        fireballVelocity = 1.0
+        maxFireballVelocity = 6.0
+        numberOfFireballs = 3
+
+        # initialise bowser-related variables
         firstShotTime = 0
         firstShot = True
         lastShot = pygame.time.get_ticks()
         collidedWithBowser = False
+        timeShooting = 6000
+        shotDelay = 150
+        shootingAfterDelay = 3000
+
+        # initialise game difficulty variables
+        updateDifficulty = 7000
         lastGameDifficultyUpdate = 0
 
         # this tells us when the previous game ended, allowing us to calculate the player score accordingly
@@ -128,7 +130,7 @@ while running:
         # Create group of fireballs
         fireballs = pygame.sprite.Group()
         for i in range (numberOfFireballs):
-            f = Fireball.Fireball()
+            f = Fireball.Fireball(fireballVelocity)
             allSprites.add(f)
             fireballs.add(f)
 
@@ -157,7 +159,7 @@ while running:
         player1.setMoving(False)
     
     ''' PLAYER ANIMATION '''
-    updateEvery = 150   # waiting time until next player animation (milliseconds)
+    updateEvery = 150               # waiting time until next player animation (milliseconds)
     player1.animate(updateEvery, pygame.time.get_ticks())
 
     update(window, allSprites)
@@ -165,18 +167,18 @@ while running:
 
 
     ''' EVERY 7 SECONDS, UP THE LEVEL OF DIFFICULTY '''
-    gap = 7000                      # waiting time until next level of difficulty (milliseconds)
     now = pygame.time.get_ticks()   # total run time of program (milliseconds)
 
-    if (now - lastGameDifficultyUpdate >= gap):         # if 7 seconds have passed and bowser is not moving...
+    # increase difficulty of game...
+    if (now - lastGameDifficultyUpdate >= updateDifficulty):
         # spawn a new fireball
-        f = Fireball.Fireball()
+        f = Fireball.Fireball(fireballVelocity)
         allSprites.add(f)
         fireballs.add(f)
 
         # increase the speed of each fireball
         fireballVelocity += 0.2
-        if fireballVelocity < 5.0:
+        if fireballVelocity < maxFireballVelocity:
             for fireball in fireballs:
                 fireball.setVelocity(fireballVelocity)
         
@@ -184,90 +186,95 @@ while running:
 
     now = pygame.time.get_ticks()
 
-    #print("moving(", bowser.getRectX() ,"-->",bowser.getNewX(), ") = ", bowser.getMoving(), " : shooting(", bowser.getRectX() ,") = ", bowser.getShooting(), " : ", bowser.direction())
+    # print("moving(", bowser.getRectX() ,"-->",bowser.getNewX(), ") = ", bowser.getMoving(), " : shooting(", bowser.getRectX() ,") = ", bowser.getShooting(), " : ", bowser.direction())
 
     ''' BOWSER MOVEMENT '''
-    # if bowser is not moving and not shooting
+    # when bowser is not moving and not shooting find a new x-coord destination to move to
     if (not bowser.getMoving() and (not bowser.getShooting())):
         bowser.setNewX(bowser.generateNewX())
         bowser.setMoving(True)
         print("CHOOSING NEW X")
-    
+
+    #  when bowser if moving...
     if bowser.getMoving():
         bowser.move()
 
-        # if bowser is moving and reached its destination
+        # keep checking if bowser has reached its destination
         if (bowser.getRectX() == bowser.getNewX()):
             print("ARRIVED AT X(", bowser.getNewX(), ")")
             bowser.setMoving(False)
             bowser.setShooting(True)
             firstShotTime = pygame.time.get_ticks()
 
+    # was it the first shot?
     if firstShot:
         firstShotTime = pygame.time.get_ticks()
     now = pygame.time.get_ticks()
-    timeShooting = 6000
-    shotDelay = 150
 
-    # bowser shoots
+    # bowser shoots for 'timeShooting' seconds...
     if (bowser.getShooting() and now - firstShotTime <= timeShooting):
         if (now - lastShot >= shotDelay or firstShot):
-            f = Enemy.Fire(bowser.getRectX() +   bowser.getWidth()//2.5, bowser.getRectY() +bowser.getHeight()//2.5)
+            f = Enemy.Fire(bowser.getRectX() + bowser.getWidth()//2.5, bowser.getRectY() +bowser.getHeight()//2.5)
             allSprites.add(f)
             bowserFires.add(f)
             lastShot = pygame.time.get_ticks()
             firstShot = False
     else:
         now = pygame.time.get_ticks()
-        if (now - lastShot > 3000):
+        if (now - lastShot > shootingAfterDelay):
             bowser.setShooting(False)
 
 
-    ''' DISPLAY SCORE INFORMATION '''
-    # write current player score to screen
+    ''' DISPLAY CURRENT USER SCORE '''
+    # calculate the current score
     score = int(pygame.time.get_ticks() - lastgame) / 16.7
-
     player1.setScore(score)
-    scoreLen = int(math.log10(player1.score))+1
 
-    Utils.textToScreen(window, "Score", windowWidth - 125, 15, 15)
-    Utils.textToScreen(window, player1.score, windowWidth - 15*scoreLen, 5, 25)
+    # display the current score
+    textToScreen(window, "Score", windowWidth - 125, 15, 15)
+    textToScreen(window, player1.score, windowWidth - 15*(int(math.log10(player1.score))+1), 5, 25)
 
-    # write hiscore to screen
+
+    ''' DISPLAY CURRENT HICSORE '''               
     hiscore = getHiScore(scores_dict)[1]
-    hiscoreLen = int(math.log10(hiscore))+1
+    textToScreen(window, "High Score", 15, 15, 15)        # write 'High Score' to screen
+    textToScreen(window, str(hiscore), 100, 5, 25)        # write the current hiscore to screen
 
+    # check if the current score is beating the hiscore
     if player1.score > hiscore:
         hiscore = int(player1.score)
-
-    Utils.textToScreen(window, "High Score", 15, 15, 15)
-    Utils.textToScreen(window, str(hiscore), 100, 5, 25)
-
+        textToScreen(window, str(hiscore), 100, 5, 25)
+    
 
     ''' GAME OVER '''
     fireballCollision = pygame.sprite.spritecollide(player1, fireballs, True, pygame.sprite.collide_circle)
     bowserFireCollision = pygame.sprite.spritecollide(player1, bowserFires, True, pygame.sprite.collide_circle)
-
     now = pygame.time.get_ticks()
 
+    # when player collides with a fireball or bowsers fire...
     if (fireballCollision or bowserFireCollision) and not collidedWithBowser:
         print("DEAD")
         collidedWithBowser = True
+        # player1.setImage(Utils.bombdead)
 
-        player1.setImage(Utils.bombdead)            # use the bombdead sprite instead
-        Utils.playerExplosion.play()                # play the explosion sound
+        # play explosion sound upon impact
+        playerExplosion.play()
         
-        playerExplosionImg = Player.Explosion(player1.getCenter(), 1)         # show explosion
+        # show explosion animation upon impact
+        playerExplosionImg = Player.Explosion(player1.getCenter(), 1)
         allSprites.add(playerExplosionImg)     
 
+        # remove the player from allSprites by killing them
         player1.kill()
     
+    # after the explosion animation, then end the game
     if (not player1.alive() and (not playerExplosionImg.alive())):
+        # write the players final score to the csv file
         with open('super-mario-bros-minigame/scores.csv', 'a', newline='') as csvfile:
             csv_writer = csv.writer(csvfile)
             csv_writer.writerow([str(player1.username), int(player1.score)])
-        # printScores(scores_dict)                  # print out the scores_dict row-by-row
         
+        # printScores(scores_dict)                  # print out the scores_dict row-by-row
         gameOver = True
 
     ''' PRESS x BUTTON '''
@@ -279,4 +286,4 @@ while running:
     # print(pygame.font.get_fonts())        # print out all font types in pygame!
     if (keys[pygame.K_SPACE]):
         for fireball in fireballs:
-            Utils.textToScreen(window, str(fireball.getId()) + " (" + str(fireball.getX())+","+str(fireball.getY())+")", fireball.getX()-10, fireball.getY()-10, 13)
+            textToScreen(window, str(fireball.getId()) + " (" + str(fireball.getX())+","+str(fireball.getY())+")", fireball.getX()-10, fireball.getY()-10, 13)

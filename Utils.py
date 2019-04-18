@@ -7,8 +7,6 @@ FPS = 60
 windowWidth = 400
 windowHeight = 600
 title = "Danger, Bob-Omb!"
-fireballCounter = 3
-fireballStartingVelocity = 1.0
 window = pygame.display.set_mode((windowWidth, windowHeight))
 
 ''' SETUP ASSETS FOLDERS '''
@@ -61,3 +59,15 @@ def playMusic(filename, volume):
     pygame.mixer.music.load(path.join(sndFolder, filename))
     pygame.mixer.music.set_volume(volume)
     pygame.mixer.music.play(loops=-1)
+
+
+''' UTILITY CLASS FOR LOADING AND PARSING SPRITESHEETS '''
+class Spritesheet:
+    def __init__(self, filename):
+        self.spritesheet = pygame.image.load(filename).convert()
+
+    ''' get an image out of a larger spritesheet '''
+    def get_image(self, x, y, width, height):
+        image = pygame.Surface((width, height))
+        image.blit(self.spritesheet, (0,0), (x,y,width,height))     # extract the image we want and blit to image surface
+        return image

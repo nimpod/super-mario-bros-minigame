@@ -8,7 +8,7 @@ class Fireball(pygame.sprite.Sprite):
 
     idGenerator = itertools.count(1)            # generate unique ID for each fireball
 
-    def __init__(self):
+    def __init__(self, startingVelocity):
         self.id = next(self.idGenerator)
         self.radius = 13
 
@@ -21,7 +21,7 @@ class Fireball(pygame.sprite.Sprite):
         # pygame.draw.circle(self.image, (0,0,0), self.rect.center, self.radius)    # Draw the players hitbox
         
         self.quadrantXY = self.chooseRandomQuadrant(random.choice(self.quadrants))
-        self.velocity = Utils.fireballStartingVelocity
+        self.velocity = startingVelocity
 
         self.respawn()
 
