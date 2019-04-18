@@ -13,7 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.dy = self.velocity
         self.username = username
         self.score = 0
-        self.dead = False
+        self.moving = False
 
         self.imagenum = 1
         self.oldTime = 0
@@ -26,7 +26,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = (x,y)
 
     def animate(self, updateEvery, totalTime):
-        if (totalTime - self.oldTime >= updateEvery and self.dead == False):
+        if (totalTime - self.oldTime >= updateEvery):
             if (self.imagenum == 0):
                 self.imagenum = 1
             elif (self.imagenum == 1):
@@ -35,13 +35,10 @@ class Player(pygame.sprite.Sprite):
             self.oldTime = totalTime
 
             # also make the bip-bob player sound whenever the animation changes            
-            if Utils.playermoving == True:
+            if self.moving == True:
                 Utils.playerSound.play()
 
-        elif (self.dead == True):
-            self.setImage(Utils.bombdead)
-
-
+    # SETTERS
     def setImage(self, newImg):
         self.image = pygame.transform.scale(newImg, (self.width, self.height))
         self.image.set_colorkey((255,255,255))
@@ -49,6 +46,13 @@ class Player(pygame.sprite.Sprite):
     def setUsername(self, username):
         self.username = username
 
+    def setMoving(self, moving):
+        self.moving = moving
+
+    def setScore(self, updatedScore):
+        self.score = updatedScore
+
+    # MOVE PLAYER
     def moveUp(self):
         self.rect.y -= self.dy
 
@@ -61,6 +65,7 @@ class Player(pygame.sprite.Sprite):
     def moveRight(self):
         self.rect.x += self.dx
 
+    # GETTERS
     @property
     def getX(self):
         return self.rect.x
@@ -77,8 +82,43 @@ class Player(pygame.sprite.Sprite):
     def getHeight(self):
         return self.height
 
-    def setDead(self, dead):
-        self.dead = dead
+    @property
+    def getRadius(self):
+        return self.radius
 
-    def setScore(self, updatedScore):
-        self.score = updatedScore
+    def getMoving(self):
+        return self.moving
+
+    def getCenter(self):
+        return self.rect.center
+    
+    def getScore(self):
+        return self.score
+
+
+
+class Explosion(pygame.sprite.Sprite):
+    
+    def __init__(self, center, radius):
+        pygame.sprite.Sprite.__init__(self)
+        self.radius = radius
+        self.image = Utils.explosionImages[0]
+        self.image = pygame.transform.scale(self.image, (self.radius, self.radius))
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.lastUpdate = pygame.time.get_ticks()
+        self.frameRate = 75
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if (now - self.lastUpdate > self.frameRate):
+            self.lastUpdate = now
+            self.frame += 1
+            if (self.frame == len(Utils.explosionImages)):
+                self.kill()
+            else:
+                center = self.rect.center
+                self.image = Utils.explosionImages[self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center

@@ -15,7 +15,6 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = Utils.windowWidth//1.9        # initially put Bowser in centre of screen
         self.rect.y = Utils.windowHeight//32
-
         self.velocity = 1.0
         self.dx = self.velocity
 
@@ -106,12 +105,12 @@ class Fire(pygame.sprite.Sprite):
     
     def update(self):
         self.rect.y += self.dy
-        self.rotate()        
+        self.rotate()
         
     def rotate(self):
         now = pygame.time.get_ticks()
-        # every 50ms...
-        if (now - self.lastUpdate >= 50):
+        # every 30ms...
+        if (now - self.lastUpdate >= 30):
             self.lastUpdate = now
             self.rotationAngle = (self.rotationAngle + self.rotationVelocity) % 360         # loop the angle back to 0 when it reaches 360
             self.image = pygame.transform.rotate(self.image_orig, self.rotationAngle)
