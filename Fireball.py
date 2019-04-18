@@ -1,6 +1,6 @@
 import pygame
 import os
-import Utils
+from Utils import *
 import random
 import itertools
 
@@ -13,7 +13,7 @@ class Fireball(pygame.sprite.Sprite):
         self.radius = 13
 
         pygame.sprite.Sprite.__init__(self)
-        self.image = Utils.fireball
+        self.image = fireball_img
         self.image = pygame.transform.scale(self.image, (self.radius, self.radius))
         self.image.set_colorkey((255,255,255))
         self.rect = self.image.get_rect()
@@ -28,13 +28,13 @@ class Fireball(pygame.sprite.Sprite):
 
     def chooseRandomQuadrant(self, randomQuadrant):
         if (randomQuadrant == "UPPER"):
-            return (random.randrange(0.0, Utils.windowWidth),random.randrange(Utils.windowHeight/2.0 - self.radius*2, Utils.windowHeight/2.0), random.choice([-1,1]), 1.0)
+            return (random.randrange(0.0, WINDOW_WIDTH),random.randrange(WINDOW_HEIGHT/2.0 - self.radius*2, WINDOW_HEIGHT/2.0), random.choice([-1,1]), 1.0)
         elif (randomQuadrant == "RIGHT"):
-            return (random.randrange(Utils.windowWidth, Utils.windowWidth + self.radius*2), random.randrange(0, Utils.windowHeight), -1.0, random.choice([-1,1]))
+            return (random.randrange(WINDOW_WIDTH, WINDOW_WIDTH + self.radius*2), random.randrange(0, WINDOW_HEIGHT), -1.0, random.choice([-1,1]))
         elif (randomQuadrant == "LOWER"):
-            return (random.randrange(0.0, Utils.windowWidth), random.randrange(Utils.windowHeight, Utils.windowHeight + self.radius*2), random.choice([-1,1]), -1.0)
+            return (random.randrange(0.0, WINDOW_WIDTH), random.randrange(WINDOW_HEIGHT, WINDOW_HEIGHT + self.radius*2), random.choice([-1,1]), -1.0)
         elif (randomQuadrant == "LEFT"):
-            return (random.randrange(0.0 - (self.radius*2), 0.0), random.randrange(0, Utils.windowHeight), 1.0, random.choice([-1,1]))
+            return (random.randrange(0.0 - (self.radius*2), 0.0), random.randrange(0, WINDOW_HEIGHT), 1.0, random.choice([-1,1]))
     
 
     def respawn(self):
@@ -50,7 +50,7 @@ class Fireball(pygame.sprite.Sprite):
         self.rect.y += self.dy
         self.rect.x += self.dx
 
-        if (self.rect.top > Utils.windowHeight+self.radius*2) or (self.rect.bottom < Utils.windowHeight/2.0 -self.radius*2) or (self.rect.right < -self.radius*2) or (self.rect.left > Utils.windowWidth+self.radius*2):
+        if (self.rect.top > WINDOW_HEIGHT+self.radius*2) or (self.rect.bottom < WINDOW_HEIGHT/2.0 -self.radius*2) or (self.rect.right < -self.radius*2) or (self.rect.left > WINDOW_WIDTH+self.radius*2):
             self.respawn()
 
     @property

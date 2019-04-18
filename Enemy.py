@@ -1,6 +1,6 @@
 import pygame
 import random
-import Utils
+from Utils import *
 
 class Enemy(pygame.sprite.Sprite):
 
@@ -9,12 +9,12 @@ class Enemy(pygame.sprite.Sprite):
         self.width = 213
         self.height = 180
 
-        self.image = Utils.bowser
+        self.image = bowser_img
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
         self.image.set_colorkey((255,255,255))
         self.rect = self.image.get_rect()
-        self.rect.x = Utils.windowWidth//1.9        # initially put Bowser in centre of screen
-        self.rect.y = Utils.windowHeight//32
+        self.rect.x = WINDOW_WIDTH//1.9        # initially put Bowser in centre of screen
+        self.rect.y = WINDOW_HEIGHT//32
         self.velocity = 1.0
         self.dx = self.velocity
 
@@ -23,7 +23,7 @@ class Enemy(pygame.sprite.Sprite):
         self.shooting = False
 
     def move(self):
-        if (self.rect.x > 0 and self.rect.x < Utils.windowWidth -self.width//1.6):
+        if (self.rect.x > 0 and self.rect.x < WINDOW_WIDTH -self.width//1.6):
             self.rect.x += self.dx
 
     #def update(self):
@@ -32,7 +32,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def generateNewX(self):
         min = 0
-        max = Utils.windowWidth -self.width//1.6
+        max = WINDOW_WIDTH -self.width//1.6
         self.newX = random.randrange(min, max)
 
         # change the x-direction depending on the new x-coordinate
@@ -88,7 +88,7 @@ class Fire(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.radius = 30
 
-        self.image_orig = Utils.bowserFire
+        self.image_orig = bowserFire_img
         self.image_orig = pygame.transform.scale(self.image_orig, (self.radius, self.radius))
         self.image_orig.set_colorkey((255,255,255))
         self.image = self.image_orig.copy()
@@ -110,7 +110,7 @@ class Fire(pygame.sprite.Sprite):
     def rotate(self):
         now = pygame.time.get_ticks()
         # every 30ms...
-        if (now - self.lastUpdate >= 30):
+        if (now - self.lastUpdate >= 15):
             self.lastUpdate = now
             self.rotationAngle = (self.rotationAngle + self.rotationVelocity) % 360         # loop the angle back to 0 when it reaches 360
             self.image = pygame.transform.rotate(self.image_orig, self.rotationAngle)

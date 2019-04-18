@@ -1,6 +1,6 @@
 import pygame
 from os import path
-import Utils
+from Utils import *
 
 
 class Player(pygame.sprite.Sprite):
@@ -19,7 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.oldTime = 0
 
         pygame.sprite.Sprite.__init__(self)
-        self.setImage(Utils.bombImages[self.imagenum])
+        self.setImage(bombImages[self.imagenum])
         self.rect = self.image.get_rect()
         self.radius = (self.width+self.height)//10
         # pygame.draw.circle(self.image, (0,0,0), self.rect.center, self.radius)    # Draw the players hitbox
@@ -31,12 +31,12 @@ class Player(pygame.sprite.Sprite):
                 self.imagenum = 1
             elif (self.imagenum == 1):
                 self.imagenum = 0            
-            self.setImage(Utils.bombImages[self.imagenum])
+            self.setImage(bombImages[self.imagenum])
             self.oldTime = totalTime
 
             # also make the bip-bob player sound whenever the animation changes            
             if self.moving == True:
-                Utils.playerSound.play()
+                playerSound.play()
 
     # SETTERS
     def setImage(self, newImg):
@@ -102,7 +102,7 @@ class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, radius):
         pygame.sprite.Sprite.__init__(self)
         self.radius = radius
-        self.image = Utils.explosionImages[0]
+        self.image = explosionImages[0]
         self.image = pygame.transform.scale(self.image, (self.radius, self.radius))
         self.rect = self.image.get_rect()
         self.rect.center = center
@@ -115,10 +115,10 @@ class Explosion(pygame.sprite.Sprite):
         if (now - self.lastUpdate > self.frameRate):
             self.lastUpdate = now
             self.frame += 1
-            if (self.frame == len(Utils.explosionImages)):
+            if (self.frame == len(explosionImages)):
                 self.kill()
             else:
                 center = self.rect.center
-                self.image = Utils.explosionImages[self.frame]
+                self.image = explosionImages[self.frame]
                 self.rect = self.image.get_rect()
                 self.rect.center = center

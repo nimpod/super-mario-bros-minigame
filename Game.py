@@ -1,5 +1,5 @@
 import pygame
-import os
+import os, sys
 import random
 import math
 import csv
@@ -15,10 +15,10 @@ pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.init()
 pygame.mixer.init()
 clock = pygame.time.Clock()
-window = pygame.display.set_mode((windowWidth, windowHeight))
-pygame.display.set_caption(title)
-background_rect = background.get_rect()
-background = pygame.transform.scale(background, (windowWidth, windowHeight))
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption(TITLE)
+background_rect = background_img.get_rect()
+background_img = pygame.transform.scale(background_img, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Game state variables
 gameOver = True
@@ -30,7 +30,7 @@ def update(window, allSprites):
 
 def render(window, allSprites):
     window.fill((0,0,0))        # reset background after each tick
-    window.blit(background, background_rect)    
+    window.blit(background_img, background_rect)    
     allSprites.draw(window)
 
 ''' PRE-LOAD or UPDATE THE LIST OF SCORES FROM THE scores.csv FILE '''
@@ -68,21 +68,23 @@ def displayMainMenu():
     print("MAIN MENU")
 
     # refresh the background
-    window.blit(background, background_rect)
+    window.blit(background_img, background_rect)
 
     # play the menu music
     playMusic('menu_music.wav', 0.4)
 
     # write text to screen
-    textToScreen(window, "Danger Bob-Omb!", 35, windowHeight/8 +10, 40)
-    textToScreen(window, "Press any key to begin", windowWidth/4, windowHeight - 20, 18)
+    textToScreen(window, "Danger Bob-Omb!", 35, WINDOW_HEIGHT/8 +10, 40)
+    textToScreen(window, "Press any key to begin", WINDOW_WIDTH/4, WINDOW_HEIGHT - 20, 18)
     pygame.display.flip()
     waiting = True
     while waiting:
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                running = False
                 pygame.quit()
+                sys.exit(0)
             if event.type == pygame.KEYUP:
                 waiting = False
                 playMusic('game_music.wav', 0.4)
@@ -119,7 +121,7 @@ while running:
         allSprites = pygame.sprite.Group()
 
         # Create the player and center them in middle of screen
-        player1 = Player.Player(windowWidth//2, windowHeight//2 + windowHeight//4, "Nathan")
+        player1 = Player.Player(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + WINDOW_HEIGHT//4, "Nathan")
         player1.setScore(0)
         allSprites.add(player1)
 
@@ -147,13 +149,13 @@ while running:
     keys = pygame.key.get_pressed()
     if player1.alive() and (keys[pygame.K_w] or keys[pygame.K_s] or keys[pygame.K_a] or keys[pygame.K_d]):
         player1.setMoving(True)
-        if (keys[pygame.K_w]) and (player1.getY > windowHeight//2):
+        if (keys[pygame.K_w]) and (player1.getY > WINDOW_HEIGHT//2):
             player1.moveUp()
-        if (keys[pygame.K_s]) and (player1.getY < windowHeight - player1.getHeight):
+        if (keys[pygame.K_s]) and (player1.getY < WINDOW_HEIGHT - player1.getHeight):
             player1.moveDown()
         if (keys[pygame.K_a]) and (player1.getX > 0):
             player1.moveLeft()
-        if (keys[pygame.K_d]) and (player1.getX < windowWidth - player1.getWidth):
+        if (keys[pygame.K_d]) and (player1.getX < WINDOW_WIDTH - player1.getWidth):
             player1.moveRight()
     else:
         player1.setMoving(False)
@@ -231,8 +233,8 @@ while running:
     player1.setScore(score)
 
     # display the current score
-    textToScreen(window, "Score", windowWidth - 125, 15, 15)
-    textToScreen(window, player1.score, windowWidth - 15*(int(math.log10(player1.score))+1), 5, 25)
+    textToScreen(window, "Score", WINDOW_WIDTH - 125, 15, 15)
+    textToScreen(window, player1.score, WINDOW_WIDTH - 15*(int(math.log10(player1.score))+1), 5, 25)
 
 
     ''' DISPLAY CURRENT HICSORE '''               
@@ -287,3 +289,5 @@ while running:
     if (keys[pygame.K_SPACE]):
         for fireball in fireballs:
             textToScreen(window, str(fireball.getId()) + " (" + str(fireball.getX())+","+str(fireball.getY())+")", fireball.getX()-10, fireball.getY()-10, 13)
+
+pygame.quit()

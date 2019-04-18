@@ -4,10 +4,11 @@ from os import path
 pygame.mixer.init()
 
 FPS = 60
-windowWidth = 400
-windowHeight = 600
-title = "Danger, Bob-Omb!"
-window = pygame.display.set_mode((windowWidth, windowHeight))
+WINDOW_WIDTH = 400
+WINDOW_HEIGHT = 600
+TITLE = "Danger, Bob-Omb!"
+
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 ''' SETUP ASSETS FOLDERS '''
 imgFolder = path.join(path.dirname(__file__), "res\img")
@@ -17,11 +18,11 @@ style2 = path.join(imgFolder, "style2")
 
 
 ''' LOAD IN IMAGES '''
-background = pygame.image.load(path.join(imgFolder, "background.png")).convert()
-fireball =   pygame.image.load(path.join(imgFolder, "fireball.png")).convert()
-bowser =     pygame.image.load(path.join(imgFolder, "bowser.png")).convert()
-bowserFire = pygame.image.load(path.join(imgFolder, "bowser_fire.png")).convert()
-bombdead =   pygame.image.load(path.join(imgFolder, "bombdead.png")).convert()
+background_img = pygame.image.load(path.join(imgFolder, "background.png")).convert()
+fireball_img =   pygame.image.load(path.join(imgFolder, "fireball.png")).convert()
+bowser_img =     pygame.image.load(path.join(imgFolder, "bowser.png")).convert()
+bowserFire_img = pygame.image.load(path.join(imgFolder, "bowser_fire.png")).convert()
+bombdead_img =   pygame.image.load(path.join(imgFolder, "bombdead.png")).convert()
 
 bombImages = []
 for i in range(2):
