@@ -101,6 +101,9 @@ class Player(pygame.sprite.Sprite):
     def getScore(self):
         return self.score
 
+    def getUsername(self):
+        return self.username
+
 
 
 class Explosion(pygame.sprite.Sprite):

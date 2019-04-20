@@ -4,6 +4,7 @@ import random
 import math
 import csv
 import operator
+import pandas as pd
 
 import Player
 import Fireball
@@ -23,6 +24,7 @@ background_img = pygame.transform.scale(background_img, (WINDOW_WIDTH, WINDOW_HE
 # Game state variables
 gameOver = True
 running = True
+startup = True
 
 def update(window, allSprites):
     pygame.display.update()
@@ -32,36 +34,6 @@ def render(window, allSprites):
     window.fill((0,0,0))        # reset background after each tick
     window.blit(background_img, background_rect)    
     allSprites.draw(window)
-
-''' PRE-LOAD or UPDATE THE LIST OF SCORES FROM THE scores.csv FILE '''
-def updateScoresDict():
-    inputfile = csv.DictReader(open("super-mario-bros-minigame/scores.csv"))
-    scores_dict = []
-    for row in inputfile:
-        scores_dict.append(row)
-    return scores_dict
-
-''' GET HIGH SCORE FROM scores.csv '''
-def getHiScore(scores_dict):
-    hiscore = None
-    username = None
-    for row in scores_dict:
-        current_username = str(row['username'])
-        current_score = int(row['score'])
-        if (hiscore == None) or (current_score >= hiscore):
-            hiscore = current_score
-            username = current_username
-    return (username, hiscore)
-
-''' GET THE TOP N SCORES FROM scores.csv '''
-def getTopN():
-    data = csv.reader(open('super-mario-bros-minigame/scores.csv'), delimiter=',')
-    return sorted(data, key=int(operator.itemgetter(1)))    # 0 specifies according to first column we want to sort
-
-''' PRINT OUT THE SCORES '''
-def printScores(scores_dict):
-    for row in scores_dict:
-        print(row['username'], row['score'])
 
 ''' DISPLAY THE MAIN MENU SCREEN '''
 def displayMainMenu():
@@ -89,11 +61,134 @@ def displayMainMenu():
                 waiting = False
                 playMusic('game_music.wav', 0.4)
 
+def displayGameOverScreen():
+    print("GAME OVER")
+
+    # append the username and score to csv
+    appendScore('super-mario-bros-minigame/scores.csv', str(player1.username), int(player1.score))
+    
+    # read csv as dataframe
+    df = pd.read_csv('super-mario-bros-minigame/scores.csv')
+
+    # sort dataframe by scores
+    df = df.sort_values('score', ascending=False)
+
+    firstPlace = df.iloc[0]['score']
+    tenthPlace = df.iloc[9]['score']
+
+    text = ''
+    if int(player1.score) < tenthPlace:
+        playMusic('game_over_loosing_music.wav', 0.4)
+        text = "Unlucky kiddo"
+    elif int(player1.score) == firstPlace:
+        playMusic('game_over_winning_music.wav', 0.4)
+        text = 'New Hiscore!'
+
+    # create an input box for user to type their name
+    box = InputBox(WINDOW_WIDTH//4 +10, WINDOW_HEIGHT//2.4 +32, 140, 32)
+
+    done = False
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
+                sys.exit(0)
+            elif event.type == pygame.KEYUP and event.key == pygame.K_RETURN:
+                done = True
+            box.handle_event(event)
+        box.update()
+
+        render(window, allSprites)
+
+        # display text
+        textToScreen(window, "Enter your name", WINDOW_WIDTH//4 +40, WINDOW_HEIGHT//2.4, 20)
+        textToScreen(window, text, WINDOW_WIDTH//2, WINDOW_HEIGHT//2.4, 20)
+
+        # display top 10 scores
+        i = 0
+        for index, row in df.iterrows():
+            textToScreen(window, str(row['username']), WINDOW_WIDTH//2, WINDOW_HEIGHT//1.5 +(i*18), 15)
+            textToScreen(window, str(row['score']), WINDOW_WIDTH//2 + 80, WINDOW_HEIGHT//1.5 +(i*18), 15)
+            i += 1
+            if i == 10:
+                break
+
+        box.draw(window)
+
+        pygame.display.flip()
+        clock.tick(30)
+    
+    df = pd.read_csv('super-mario-bros-minigame/scores.csv')        # re-read the csv into a dataframe
+    df.drop(df.tail(1).index,inplace=True)                          # delete the last row
+    df.to_csv('super-mario-bros-minigame/scores.csv', encoding='utf-8', index=False)
+
+    # re-append new data
+    appendScore('super-mario-bros-minigame/scores.csv', str(player1.username), int(player1.score))
+
+    displayMainMenu()
+
+
+''' APPEND A USERNAME & SCORE TO CSV '''
+def appendScore(filename, username, score):
+    # write the players final score to the csv file
+    with open(filename, 'a', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow([username, score])
+
+
+COLOR_INACTIVE = pygame.Color('lightskyblue3')
+COLOR_ACTIVE = pygame.Color('dodgerblue2')
+FONT = pygame.font.Font(None, 32)
+
+class InputBox:
+    def __init__(self, x, y, w, h, text=''):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = COLOR_INACTIVE
+        self.text = text
+        self.txt_surface = FONT.render(text, True, self.color)
+        self.active = False
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):       # If the user clicked on the input_box rect.
+                self.active = not self.active           # Toggle the active variable.
+            else:
+                self.active = False
+            self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE        # Change the current color of the input box.
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_RETURN:
+                    player1.setUsername(self.text)
+                elif event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                else:
+                    self.text += event.unicode
+                # Re-render the text.
+                self.txt_surface = FONT.render(self.text, True, self.color)
+
+    def getText(self):
+        return self.text
+
+    def update(self):
+        width = max(200, self.txt_surface.get_width()+10)       # Resize the box if the text is too long.
+        self.rect.w = width
+
+    def draw(self, screen):
+        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))   # Blit the text.
+        pygame.draw.rect(screen, self.color, self.rect, 2)              # Blit the rect.
+
 
 ''' GAME LOOP '''
 while running:
-    if gameOver:
+    if startup:
         displayMainMenu()
+    elif gameOver:
+        displayGameOverScreen()
+    
+    if gameOver or startup:
+        # displayMainMenu()
+        startup = False
         gameOver = False
 
         # initialise fireball variables
@@ -121,7 +216,7 @@ while running:
         allSprites = pygame.sprite.Group()
 
         # Create the player and center them in middle of screen
-        player1 = Player.Player(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + WINDOW_HEIGHT//4, "Nathan")
+        player1 = Player.Player(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + WINDOW_HEIGHT//4, "________")
         player1.setScore(0)
         allSprites.add(player1)
 
@@ -140,7 +235,7 @@ while running:
         bowserFires = pygame.sprite.Group()
 
         # load scores.csv into a dictionary
-        scores_dict = updateScoresDict()
+        df = pd.read_csv('super-mario-bros-minigame/scores.csv')
 
     clock.tick(FPS)
     pygame.event.pump()
@@ -149,8 +244,9 @@ while running:
     for e in pygame.event.get():
         if e.type == pygame.MOUSEMOTION:
             mx, my = pygame.mouse.get_pos()
-            player1.setX(mx)
-            player1.setY(my)
+            if (my > WINDOW_HEIGHT//2) and (my < WINDOW_HEIGHT - player1.getHeight) and (mx > 0) and (mx < WINDOW_WIDTH - player1.getWidth):
+                player1.setX(mx)
+                player1.setY(my)
 
     ''' PLAYER MOVEMENT - keyboard '''
     keys = pygame.key.get_pressed()
@@ -241,8 +337,9 @@ while running:
     textToScreen(window, player1.score, WINDOW_WIDTH - 15*(int(math.log10(player1.score))+1), 5, 25)
 
 
-    ''' DISPLAY CURRENT HICSORE '''               
-    hiscore = getHiScore(scores_dict)[1]
+    ''' DISPLAY CURRENT HICSORE '''
+    df_copy = df.sort_values('score', ascending=False)
+    hiscore = int(df_copy.iloc[0,1])
     textToScreen(window, "High Score", 15, 15, 15)        # write 'High Score' to screen
     textToScreen(window, str(hiscore), 100, 5, 25)        # write the current hiscore to screen
 
@@ -261,7 +358,7 @@ while running:
     if (fireballCollision or bowserFireCollision) and not collidedWithBowser:
         print("DEAD")
         collidedWithBowser = True
-        # player1.setImage(Utils.bombdead)
+        player1.setImage(bombdead_img)
 
         # play explosion sound upon impact
         playerExplosion.play()
@@ -275,12 +372,9 @@ while running:
     
     # after the explosion animation, then end the game
     if (not player1.alive() and (not playerExplosionImg.alive())):
-        # write the players final score to the csv file
-        with open('super-mario-bros-minigame/scores.csv', 'a', newline='') as csvfile:
-            csv_writer = csv.writer(csvfile)
-            csv_writer.writerow([str(player1.username), int(player1.score)])
-        
-        # printScores(scores_dict)                  # print out the scores_dict row-by-row
+        # print(df.head(len(df)))           # print out all scores
+        # print(df.sort_values('score', ascending=False))        # print out all scores in sorted order
+        # print(df.sort_values('score', ascending=False).head(10))        # print out top 10 scores
         gameOver = True
 
     ''' PRESS x BUTTON '''
