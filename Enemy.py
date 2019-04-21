@@ -88,7 +88,7 @@ class Fire(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.radius = 30
 
-        self.image_orig = bowserFire_img
+        self.image_orig = bowserfire_img
         self.image_orig = pygame.transform.scale(self.image_orig, (self.radius, self.radius))
         self.image_orig.set_colorkey((255,255,255))
         self.image = self.image_orig.copy()
@@ -101,17 +101,19 @@ class Fire(pygame.sprite.Sprite):
 
         self.rotationAngle = 0
         self.rotationVelocity = random.randrange(-8,8)
-        self.lastUpdate = pygame.time.get_ticks()
+        self.last_rotation = pygame.time.get_ticks()
+        self.last_enlarge = pygame.time.get_ticks()
     
     def update(self):
         self.rect.y += self.dy
         self.rotate()
+        # self.enlarge()
         
     def rotate(self):
         now = pygame.time.get_ticks()
-        # every 30ms...
-        if (now - self.lastUpdate >= 15):
-            self.lastUpdate = now
+        # every 15ms...
+        if (now - self.last_rotation >= 10):
+            self.last_rotation = now
             self.rotationAngle = (self.rotationAngle + self.rotationVelocity) % 360         # loop the angle back to 0 when it reaches 360
             self.image = pygame.transform.rotate(self.image_orig, self.rotationAngle)
             '''new_image = pygame.transform.rotate(self.image_orig, self.rotationVelocity)    # rotate the fire
@@ -119,3 +121,18 @@ class Fire(pygame.sprite.Sprite):
             self.image = new_image
             self.rect = self.image.get_rect()
             self.rect.center = old_center'''
+
+    def enlarge(self):
+        now = pygame.time.get_ticks()
+        # every 30ms...
+        if (now - self.last_enlarge >= 20 and self.radius < 70):
+            #print('enlarging : ', self.radius)
+            self.last_enlarge = now
+            self.radius += 2
+        self.image = pygame.transform.scale(self.image_orig, (self.radius, self.radius))
+
+    def getRadius(self):
+        return self.radius
+
+    def getY(self):
+        return self.rect.y

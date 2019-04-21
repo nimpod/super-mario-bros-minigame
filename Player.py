@@ -25,8 +25,9 @@ class Player(pygame.sprite.Sprite):
         # pygame.draw.circle(self.image, (0,0,0), self.rect.center, self.radius)    # Draw the players hitbox
         self.rect.center = (x,y)
 
-    def animate(self, updateEvery, totalTime):
-        if (totalTime - self.oldTime >= updateEvery):
+    def animate(self, totalTime):
+        update_every = 150      # waiting time until next animation
+        if (totalTime - self.oldTime >= update_every):
             if (self.imagenum == 0):
                 self.imagenum = 1
             elif (self.imagenum == 1):

@@ -7,6 +7,9 @@ FPS = 60
 WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 600
 TITLE = "Danger, Bob-Omb!"
+VOLUME = 0.1
+SCORES_CSV = 'super-mario-bros-minigame/scores.csv'
+SPRITESHEET = "spritesheet.png"
 
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
@@ -21,7 +24,7 @@ style2 = path.join(imgFolder, "style2")
 background_img = pygame.image.load(path.join(imgFolder, "background.png")).convert()
 fireball_img =   pygame.image.load(path.join(imgFolder, "fireball.png")).convert()
 bowser_img =     pygame.image.load(path.join(imgFolder, "bowser.png")).convert()
-bowserFire_img = pygame.image.load(path.join(imgFolder, "bowser_fire.png")).convert()
+bowserfire_img = pygame.image.load(path.join(imgFolder, "bowser_fire.png")).convert()
 bombdead_img =   pygame.image.load(path.join(imgFolder, "bombdead.png")).convert()
 
 bombImages = []
@@ -48,19 +51,25 @@ playerExplosion.set_volume(0.9)
 
 
 ''' DRAWS TEXT TO SCREEN - you define the position, colour and font size of the text '''
-def textToScreen(window, text, x, y, fontSize):
+def text_to_screen(window, text, x, y, size, colour=(255,255,255), family='perpetua'):
     text = str(text)
-    font = pygame.font.SysFont('perpetua', fontSize)
+    font = pygame.font.SysFont(family, size)
     font.set_bold(True)
-    text = font.render(text, True, (255,255,255))
+    text = font.render(text, True, colour)
     window.blit(text, (x,y))
 
 ''' PLAY MUSIC FILE '''
-def playMusic(filename, volume):
+def play_music(filename, volume):
     pygame.mixer.music.load(path.join(sndFolder, filename))
     pygame.mixer.music.set_volume(volume)
     pygame.mixer.music.play(loops=-1)
 
+''' COLOURS '''
+BLACK = (0,0,0)
+GREEN = (240,255,0)
+PINK = (255,192,203)
+RED = (255,0,0)
+WHITE = (255,255,255)
 
 ''' UTILITY CLASS FOR LOADING AND PARSING SPRITESHEETS '''
 class Spritesheet:
@@ -72,3 +81,32 @@ class Spritesheet:
         image = pygame.Surface((width, height))
         image.blit(self.spritesheet, (0,0), (x,y,width,height))     # extract the image we want and blit to image surface
         return image
+
+''' UTILITY CLASS FOR CREATING INTERACTIVE BUTTONS '''
+class Button:
+    def __init__(self, x, y, width, height, colour, text=''):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.colour = colour
+        self.text = text
+    
+    def draw(self, window, outline=None):
+        if outline:
+            pygame.draw.rect(window, self.colour, (self.x-2, self.y-2, self.width+4, self.height+4), 0)
+        pygame.draw.rect(window, self.colour, (self.x, self.y, self.width, self.height), 0)
+
+        if self.text != '':
+            font = pygame.font.SysFont('perpetua', 20)
+            text = font.render(self.text, 1, BLACK)
+            window.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2)))
+    
+    def is_over(self, pos):
+        if pos[0] > self.x and pos[0] < self.x + self.width:
+            if pos[1] > self.y and pos[1] < self.y + self.height:
+                return True
+        return False
+
+    def __repr__(self):
+        return self.text

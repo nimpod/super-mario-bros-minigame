@@ -49,7 +49,7 @@ class Fireball(pygame.sprite.Sprite):
     def update(self):
         self.rect.y += self.dy
         self.rect.x += self.dx
-
+        
         if (self.rect.top > WINDOW_HEIGHT+self.radius*2) or (self.rect.bottom < WINDOW_HEIGHT/2.0 -self.radius*2) or (self.rect.right < -self.radius*2) or (self.rect.left > WINDOW_WIDTH+self.radius*2):
             self.respawn()
 
