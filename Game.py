@@ -272,8 +272,8 @@ while running:
 
         # initialise fireball variables
         fireball_vel = 1.0
-        max_fireball_vel = 6.0
-        num_fireballs = 4
+        max_fireball_vel = 2.5
+        num_fireballs = 3
 
         # initialise bowser-related variables
         first_shot_time = 0
@@ -371,8 +371,8 @@ while running:
         fireballs.add(f)
 
         # increase the speed of each fireball
-        fireball_vel += 0.1
         if fireball_vel < max_fireball_vel:
+            fireball_vel += 0.1
             for fireball in fireballs:
                 fireball.setVelocity(fireball_vel)
         
