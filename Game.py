@@ -42,6 +42,7 @@ running = True
 startup = True
 paused = False
 game_state = 'MAIN MENU'
+timeGameStarted = 0
 
 def update(window, all_sprites):
     pygame.display.update()
@@ -93,6 +94,7 @@ def display_main_menu():
                     if b.is_over(pos):
                         if b.__repr__() == 'START':
                             waiting = False
+                            timeGameStarted = pygame.time.get_ticks()
                             play_music('game_music.wav', VOLUME)
                         elif b.__repr__() == 'SETTINGS':
                             print('you clicked the settings button')
@@ -265,8 +267,6 @@ while running:
         display_game_over_screen()
     
     if game_over or startup:
-        game_state = 'GAME ACTIVE'
-
         startup = False
         game_over = False
 
@@ -315,6 +315,8 @@ while running:
 
         # load scores.csv into a dictionary
         df = pd.read_csv(SCORES_CSV)
+
+        game_state = 'PLAYING'
 
     clock.tick(FPS)
     pygame.event.pump()
@@ -408,6 +410,9 @@ while running:
     # bowser shoots for 'time_shooting' seconds...
     if (bowser.getShooting() and now - first_shot_time <= time_shooting):
         if (now - last_shot >= shot_delay or first_shot):
+            enemyFire.play()
+            if not player1.alive():
+                enemyFire.stop()
             f = Enemy.Fire(bowser.getRectX() + bowser.getWidth()//2.5, bowser.getRectY() +bowser.getHeight()//2.5)
             all_sprites.add(f)
             bowser_fires.add(f)
@@ -417,6 +422,8 @@ while running:
         now = pygame.time.get_ticks()
         if (now - last_shot > after_shot_delay):
             bowser.setShooting(False)
+            enemyFire.fadeout(3000)
+
     
     # delete a fire from all_sprites if it is off the screen
     for f in bowser_fires:

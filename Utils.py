@@ -7,7 +7,7 @@ FPS = 60
 WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 600
 TITLE = "Danger, Bob-Omb!"
-VOLUME = 0.1
+VOLUME = 0.9
 SCORES_CSV = 'super-mario-bros-minigame/scores.csv'
 SPRITESHEET = "spritesheet.png"
 
@@ -49,6 +49,12 @@ playerSound.set_volume(0.1)
 playerExplosion = pygame.mixer.Sound(path.join(sndFolder, 'player_explosion.wav'))
 playerExplosion.set_volume(0.9)
 
+enemyFire = pygame.mixer.Sound(path.join(sndFolder, 'enemy_fire.wav'))
+enemyFire.set_volume(0.05)
+
+countdown = pygame.mixer.Sound(path.join(sndFolder, 'countdown.wav'))
+countdown.set_volume(0.9)
+
 
 ''' DRAWS TEXT TO SCREEN - you define the position, colour and font size of the text '''
 def text_to_screen(window, text, x, y, size, colour=(255,255,255), family='perpetua'):
@@ -63,6 +69,11 @@ def play_music(filename, volume):
     pygame.mixer.music.load(path.join(sndFolder, filename))
     pygame.mixer.music.set_volume(volume)
     pygame.mixer.music.play(loops=-1)
+
+def play_sound_once(filename, volume):
+    pygame.mixer.music.load(path.join(sndFolder, filename))
+    pygame.mixer.music.set_volume(volume)
+    pygame.mixer.music.play()
 
 ''' COLOURS '''
 BLACK = (0,0,0)
