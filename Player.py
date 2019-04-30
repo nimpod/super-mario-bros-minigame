@@ -5,15 +5,17 @@ from Utils import *
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, x, y, username):
-        self.width = 23
-        self.height = 34
-        self.velocity = 3.0
+    def __init__(self, x, y, width, height, updateAnimation, velocity, username):
+        self.width = width
+        self.height = height
+        self.velocity = velocity
         self.dx = self.velocity
         self.dy = self.velocity
         self.username = username
         self.score = 0
         self.moving = False
+        
+        self.updateAnimation = updateAnimation      # waiting time until next animation
 
         self.imagenum = 1
         self.oldTime = 0
@@ -26,8 +28,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = (x,y)
 
     def animate(self, totalTime):
-        update_every = 150      # waiting time until next animation
-        if (totalTime - self.oldTime >= update_every):
+        if (totalTime - self.oldTime >= self.updateAnimation):
             if (self.imagenum == 0):
                 self.imagenum = 1
             elif (self.imagenum == 1):
@@ -42,7 +43,7 @@ class Player(pygame.sprite.Sprite):
     # SETTERS
     def setImage(self, newImg):
         self.image = pygame.transform.scale(newImg, (self.width, self.height))
-        self.image.set_colorkey((255,255,255))
+        self.image.set_colorkey(WHITE)
 
     def setUsername(self, username):
         self.username = username

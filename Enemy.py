@@ -9,9 +9,9 @@ class Enemy(pygame.sprite.Sprite):
         self.width = 213
         self.height = 180
 
-        self.image = bowser_img
+        self.image = enemy_img
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
-        self.image.set_colorkey((255,255,255))
+        self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()
         self.rect.x = WINDOW_WIDTH//1.9        # initially put Bowser in centre of screen
         self.rect.y = WINDOW_HEIGHT//32
@@ -88,7 +88,7 @@ class Fire(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.radius = 30
 
-        self.image_orig = bowserfire_img
+        self.image_orig = enemy_fire_img
         self.image_orig = pygame.transform.scale(self.image_orig, (self.radius, self.radius))
         self.image_orig.set_colorkey((255,255,255))
         self.image = self.image_orig.copy()

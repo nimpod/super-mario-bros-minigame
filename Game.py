@@ -23,7 +23,6 @@ window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption(TITLE)
 background_rect = background_img.get_rect()
 background_img = pygame.transform.scale(background_img, (WINDOW_WIDTH, WINDOW_HEIGHT))
-# spritesheet = Spritesheet(os.path.join(imgFolder, SPRITESHEET))
 
 # Buttons
 x = WINDOW_WIDTH//3
@@ -34,6 +33,7 @@ start_button = Button(x, y, w, h, WHITE, 'START')
 settings_button = Button(x, (y+(h*2)), w, h, WHITE, 'SETTINGS')
 scores_button = Button(x, (y+(h*4)), w, h, WHITE, 'SCORES')
 exit_button = Button(x, (y+(h*6)), w, h, WHITE, 'EXIT')
+menu_button = Button(10,10, w, h, WHITE, 'Back to menu')
 buttons = [start_button, settings_button, scores_button, exit_button]
 
 # Game state variables
@@ -44,14 +44,14 @@ paused = False
 game_state = 'MAIN MENU'
 timeGameStarted = 0
 
-def update(window, all_sprites):
+def update(window, sprites):
     pygame.display.update()
-    all_sprites.update()
+    sprites.update()
 
-def render(window, all_sprites):
+def render(window, sprites):
     window.fill(BLACK)        # reset background after each tick
     window.blit(background_img, background_rect)    
-    all_sprites.draw(window)
+    sprites.draw(window)
 
 def redraw_buttons(window):
     for b in buttons:
@@ -61,23 +61,27 @@ def quit():
     pygame.quit()
     sys.exit(0)
 
-''' WHEN PLAYER STARTS GAME OR EXITS GAME OVER SCREEN, THIS MAIN MENU SCREEN IS DISPLAYED '''
-def display_main_menu():
-    game_state = 'MAIN MENU'
+
+def display_scores_screen():
+    game_state = 'SCORES'
     print(game_state)
 
     # refresh the background
     window.blit(background_img, background_rect)
-    redraw_buttons(window)
+    menu_button.draw(window, BLACK)
 
     # play the menu music
-    play_music('menu_music.wav', VOLUME)
+    play_music('scores_music.wav', VOLUME)
+
+    # sort the dataframe by scores
+    df = pd.read_csv(SCORES_CSV)
+    df = df.sort_values('score', ascending=False)
 
     # write text to screen
-    text_to_screen(window, "Danger Bob-Omb!", 35, WINDOW_HEIGHT/8 +10, 40)
     pygame.display.flip()
-    waiting = True
-    while waiting:
+    loookingAtScores = True
+    
+    while loookingAtScores:
         clock.tick(FPS)
         for event in pygame.event.get():
             pos = pygame.mouse.get_pos()
@@ -87,28 +91,33 @@ def display_main_menu():
                 running = False
                 quit()
             
-            # button interaction
-            for b in buttons:
-                # player clicks a button
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if b.is_over(pos):
-                        if b.__repr__() == 'START':
-                            waiting = False
-                            timeGameStarted = pygame.time.get_ticks()
-                            play_music('game_music.wav', VOLUME)
-                        elif b.__repr__() == 'SETTINGS':
-                            print('you clicked the settings button')
-                        elif b.__repr__() == 'SCORES':
-                            print('you clicked the sccores button')
-                        elif b.__repr__() == 'EXIT':
-                            running = False
-                            quit()
-                # player hovers over a button
-                if event.type == pygame.MOUSEMOTION:
-                    if b.is_over(pos):
-                        b.color = GREEN
-                    else:
-                        b.color = WHITE
+            # player clicks a button
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if menu_button.is_over(pos):
+                    loookingAtScores = False
+                    display_main_menu()
+        
+        render(window, menu_button)
+
+        h = WINDOW_HEIGHT//8
+        w = WINDOW_WIDTH//3.5
+
+        text_to_screen(window, "All Time Scores", w-20, h-h +40, 30)
+
+        i = 0
+        colour = WHITE
+        for index, row in df.iterrows():
+            text_to_screen(window, str(i+1), w, h+(i*17), 14, colour)
+            text_to_screen(window, str(row['username']), w+40, h+(i*17), 14, colour)
+            text_to_screen(window, str(row['score'])+'pts', w+160, h+(i*17), 14, colour)
+            i += 1
+            if i == 30:
+                break
+        
+        pygame.display.flip()
+        clock.tick(FPS)
+    
+    display_main_menu()
 
 
 ''' WHEN PLAYER DIES THIS FUNCTION IS CALLED TO DISPLAY GAME OVER RELATED INFORMATION '''
@@ -125,6 +134,7 @@ def display_game_over_screen():
     # sort dataframe by scores
     df = df.sort_values('score', ascending=False)
 
+    # find out where the player positioned in the all time scores
     player_pos = 0
     for index,row in df.iterrows():
         if row['username'] == str(player1.username) and row['score'] == int(player1.score):
@@ -140,6 +150,7 @@ def display_game_over_screen():
         text = 'New Hiscore! Oh my god Becky!'
     elif int(player1.score) < tenthPlace:
         play_music('game_over_not_top10_music.wav', VOLUME)
+        text = "Better luck next time!"
     elif int(player1.score) >= tenthPlace:
         play_music('game_over_top10_music.wav', VOLUME)
         text = 'Congrats, you got top 10!'
@@ -180,7 +191,7 @@ def display_game_over_screen():
             # display pos, username, score
             text_to_screen(window, str(i+1)            , w   , h+(i*18), 15, colour)
             text_to_screen(window, str(row['username']), w+40, h+(i*18), 15, colour)
-            text_to_screen(window, str(row['score'])   , w+160, h+(i*18), 15, colour)
+            text_to_screen(window, str(row['score'])+'pts', w+160, h+(i*18), 15, colour)
             i += 1
             if i == 10:
                 break
@@ -189,16 +200,80 @@ def display_game_over_screen():
             text_to_screen(window, str('--------------------------------'), w, WINDOW_HEIGHT//1.11, 15)
             text_to_screen(window, str(player_pos), w, WINDOW_HEIGHT//1.08, 15, RED)
             text_to_screen(window, str(player1.username), w+40, WINDOW_HEIGHT//1.08, 15, RED)
-            text_to_screen(window, str(int(player1.score)), w+160, WINDOW_HEIGHT//1.08, 15, RED)
+            text_to_screen(window, str(int(player1.score))+'pts', w+160, WINDOW_HEIGHT//1.08, 15, RED)
 
         box.draw(window)
 
         pygame.display.flip()
-        clock.tick(30)
+        clock.tick(FPS)
     
     change_username(str(player1.username))
 
     display_main_menu()
+
+''' WHEN PLAYER STARTS GAME OR EXITS GAME OVER SCREEN, THIS MAIN MENU SCREEN IS DISPLAYED '''
+def display_main_menu():
+    game_state = 'MAIN MENU'
+    print(game_state)
+
+    # refresh the background
+    window.blit(background_img, background_rect)
+    redraw_buttons(window)
+
+    # play the menu music
+    play_music('menu_music.wav', VOLUME)
+
+    menu_sprites = pygame.sprite.Group()
+    bomb = MenuSprite(bombImages, WINDOW_WIDTH, WINDOW_HEIGHT//8, 23, 34, 500)
+
+    menu_sprites.add(bomb)
+
+    for s in menu_sprites:
+        # print("moving to ", s.getX())
+        # render(window, menu_sprites)
+        # update(window, menu_sprites)
+        if s.getX() < 0:
+            s.kill()
+
+    # write text to screen
+    text_to_screen(window, "Danger Bob-Omb!", 35, WINDOW_HEIGHT/8 +10, 40)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+
+        for event in pygame.event.get():
+            pos = pygame.mouse.get_pos()
+
+            # player presses 'x' button
+            if event.type == pygame.QUIT:
+                running = False
+                quit()
+            
+            # button interaction
+            for b in buttons:
+                # player clicks a button
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if b.is_over(pos):
+                        if b.__repr__() == 'START':
+                            waiting = False
+                            timeGameStarted = pygame.time.get_ticks()
+                            play_music('game_music.wav', VOLUME)
+                        elif b.__repr__() == 'SETTINGS':
+                            print('you clicked the settings button')
+                        elif b.__repr__() == 'SCORES':
+                            waiting = False
+                            display_scores_screen()
+                        elif b.__repr__() == 'EXIT':
+                            running = False
+                            quit()
+                # player hovers over a button
+                if event.type == pygame.MOUSEMOTION:
+                    if b.is_over(pos):
+                        b.color = GREEN
+                    else:
+                        b.color = WHITE
+
 
 ''' UPDATE USERNAME OF A DATA ENTRY IN CSV FILE '''
 def change_username(username):
@@ -267,6 +342,7 @@ while running:
         display_game_over_screen()
     
     if game_over or startup:
+        print("Hello")
         startup = False
         game_over = False
 
@@ -295,7 +371,13 @@ while running:
         all_sprites = pygame.sprite.Group()
 
         # Create the player and center them in middle of screen
-        player1 = Player.Player(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + WINDOW_HEIGHT//4, "you")
+        player_x = WINDOW_WIDTH//2
+        player_y = WINDOW_HEIGHT//2 + WINDOW_HEIGHT//4
+        player_width = 23
+        player_height = 34
+        player_update = 150
+        player_velocity = 3.0
+        player1 = Player.Player(player_x, player_y, player_width, player_height, player_update, player_velocity, "you")
         player1.setScore(0)
         all_sprites.add(player1)
 
@@ -461,7 +543,7 @@ while running:
     if (fireballCollision or bowserFireCollision) and not collidedWithBowser:
         game_state = 'DEAD'
         collidedWithBowser = True
-        player1.setImage(bombdead_img)
+        player1.setImage(bombImages[2])
 
         # play explosion sound upon impact
         playerExplosion.play()

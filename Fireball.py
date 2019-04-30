@@ -13,9 +13,9 @@ class Fireball(pygame.sprite.Sprite):
         self.radius = 13
 
         pygame.sprite.Sprite.__init__(self)
-        self.image = fireball_img
+        self.image = spritesheet.get_image(152, 402, 26, 26)
         self.image = pygame.transform.scale(self.image, (self.radius, self.radius))
-        self.image.set_colorkey((255,255,255))
+        self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()
 
         # pygame.draw.circle(self.image, (0,0,0), self.rect.center, self.radius)    # Draw the players hitbox
