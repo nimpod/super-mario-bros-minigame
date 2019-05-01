@@ -29,12 +29,13 @@ x = WINDOW_WIDTH//3
 y = WINDOW_HEIGHT//1.7
 w = 130
 h = 30
-start_button = Button(x, y, w, h, WHITE, 'START')
-settings_button = Button(x, (y+(h*2)), w, h, WHITE, 'SETTINGS')
-scores_button = Button(x, (y+(h*4)), w, h, WHITE, 'SCORES')
-exit_button = Button(x, (y+(h*6)), w, h, WHITE, 'EXIT')
+
+start_button = Button(x, (y+(h*1)), w, h, WHITE, 'START')
+#settings_button = Button(x, (y+(h*2)), w, h, WHITE, 'SETTINGS')
+scores_button = Button(x, (y+(h*3)), w, h, WHITE, 'SCORES')
+exit_button = Button(x, (y+(h*5)), w, h, WHITE, 'EXIT')
 menu_button = Button(10,10, w, h, WHITE, 'Back to menu')
-buttons = [start_button, settings_button, scores_button, exit_button]
+buttons = [start_button, scores_button, exit_button]
 
 # Game state variables
 game_over = True
@@ -60,7 +61,6 @@ def redraw_buttons(window):
 def quit():
     pygame.quit()
     sys.exit(0)
-
 
 def display_scores_screen():
     game_state = 'SCORES'
@@ -95,7 +95,8 @@ def display_scores_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if menu_button.is_over(pos):
                     loookingAtScores = False
-                    display_main_menu()
+                    startup = False
+                    display_main_menu(pygame.time.get_ticks())
         
         render(window, menu_button)
 
@@ -117,7 +118,8 @@ def display_scores_screen():
         pygame.display.flip()
         clock.tick(FPS)
     
-    display_main_menu()
+    startup = False
+    display_main_menu(pygame.time.get_ticks())
 
 
 ''' WHEN PLAYER DIES THIS FUNCTION IS CALLED TO DISPLAY GAME OVER RELATED INFORMATION '''
@@ -209,39 +211,53 @@ def display_game_over_screen():
     
     change_username(str(player1.username))
 
-    display_main_menu()
+    display_main_menu(pygame.time.get_ticks())
+
 
 ''' WHEN PLAYER STARTS GAME OR EXITS GAME OVER SCREEN, THIS MAIN MENU SCREEN IS DISPLAYED '''
-def display_main_menu():
+def display_main_menu(time_started):
     game_state = 'MAIN MENU'
     print(game_state)
+
+    # play the menu music
+    play_music('menu_music.wav', VOLUME)
+
+    last = pygame.time.get_ticks()
+    now = pygame.time.get_ticks()
+    print('startup = ' + str(startup))
+    if time_started < 3300:
+        background = pygame.Surface(window.get_size())
+        background.fill(BLACK)
+        while now - last <= 3300:
+            now = pygame.time.get_ticks()
+            window.blit(background, (0,0))
+            text_to_screen(window, "Rock Tomlinson Studios presents...", 75, WINDOW_HEIGHT//2.4, 18, WHITE)
+            pygame.display.update()
 
     # refresh the background
     window.blit(background_img, background_rect)
     redraw_buttons(window)
-
-    # play the menu music
-    play_music('menu_music.wav', VOLUME)
 
     menu_sprites = pygame.sprite.Group()
     bomb = MenuSprite(bombImages, WINDOW_WIDTH, WINDOW_HEIGHT//8, 23, 34, 500)
 
     menu_sprites.add(bomb)
 
-    for s in menu_sprites:
-        # print("moving to ", s.getX())
-        # render(window, menu_sprites)
-        # update(window, menu_sprites)
-        if s.getX() < 0:
-            s.kill()
-
     # write text to screen
-    text_to_screen(window, "Danger Bob-Omb!", 35, WINDOW_HEIGHT/8 +10, 40)
-    pygame.display.flip()
+    text_to_screen(window, "Danger, Bob-Omb! Danger!", 10, WINDOW_HEIGHT/8 +10, 30)
+    #text_to_screen(window, "Double click the buttons!", WINDOW_WIDTH//3.6, WINDOW_HEIGHT//1.75, 16)
+
     waiting = True
     while waiting:
-        clock.tick(FPS)
-
+        '''
+        for s in menu_sprites:
+            print("moving to ", s.getX())
+            render(window, menu_sprites)
+            update(window, menu_sprites)
+            pygame.display.update()
+            if s.getX() < 0-s.getWidth():
+                s.kill()
+        '''
         for event in pygame.event.get():
             pos = pygame.mouse.get_pos()
 
@@ -259,8 +275,6 @@ def display_main_menu():
                             waiting = False
                             timeGameStarted = pygame.time.get_ticks()
                             play_music('game_music.wav', VOLUME)
-                        elif b.__repr__() == 'SETTINGS':
-                            print('you clicked the settings button')
                         elif b.__repr__() == 'SCORES':
                             waiting = False
                             display_scores_screen()
@@ -273,6 +287,8 @@ def display_main_menu():
                         b.color = GREEN
                     else:
                         b.color = WHITE
+        clock.tick(FPS)        
+        pygame.display.flip()
 
 
 ''' UPDATE USERNAME OF A DATA ENTRY IN CSV FILE '''
@@ -337,12 +353,11 @@ class InputBox:
 ''' GAME LOOP '''
 while running:
     if startup:
-        display_main_menu()
+        display_main_menu(pygame.time.get_ticks())
     elif game_over:
         display_game_over_screen()
     
     if game_over or startup:
-        print("Hello")
         startup = False
         game_over = False
 
@@ -377,7 +392,7 @@ while running:
         player_height = 34
         player_update = 150
         player_velocity = 3.0
-        player1 = Player.Player(player_x, player_y, player_width, player_height, player_update, player_velocity, "you")
+        player1 = Player.Player(player_x, player_y, player_width, player_height, player_update, player_velocity, player_sprite, "you")
         player1.setScore(0)
         all_sprites.add(player1)
 

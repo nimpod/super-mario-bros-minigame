@@ -5,7 +5,7 @@ from Utils import *
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, x, y, width, height, updateAnimation, velocity, username):
+    def __init__(self, x, y, width, height, updateAnimation, velocity, character, username):
         self.width = width
         self.height = height
         self.velocity = velocity
@@ -17,11 +17,12 @@ class Player(pygame.sprite.Sprite):
         
         self.updateAnimation = updateAnimation      # waiting time until next animation
 
+        self.character = character
         self.imagenum = 1
         self.oldTime = 0
 
         pygame.sprite.Sprite.__init__(self)
-        self.setImage(bombImages[self.imagenum])
+        self.setImage(self.character[self.imagenum])
         self.rect = self.image.get_rect()
         self.radius = (self.width+self.height)//10
         # pygame.draw.circle(self.image, (0,0,0), self.rect.center, self.radius)    # Draw the players hitbox
@@ -33,7 +34,7 @@ class Player(pygame.sprite.Sprite):
                 self.imagenum = 1
             elif (self.imagenum == 1):
                 self.imagenum = 0            
-            self.setImage(bombImages[self.imagenum])
+            self.setImage(self.character[self.imagenum])
             self.oldTime = totalTime
 
             # also make the bip-bob player sound whenever the animation changes            

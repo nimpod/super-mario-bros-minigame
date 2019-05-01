@@ -7,7 +7,7 @@ pg.mixer.init()
 FPS = 60
 WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 600
-TITLE = "Danger, Bob-Omb!"
+TITLE = "Danger, Bob-Omb! Danger!"
 VOLUME = 0.9
 SCORES_CSV = 'super-mario-bros-minigame/scores.csv'
 SPRITESHEET = "spritesheet_1.png"
@@ -32,7 +32,7 @@ playerExplosion = pg.mixer.Sound(path.join(sndFolder, 'player_explosion.wav'))
 playerExplosion.set_volume(0.9)
 
 enemyFire = pg.mixer.Sound(path.join(sndFolder, 'enemy_fire.wav'))
-enemyFire.set_volume(0.05)
+enemyFire.set_volume(0.5)
 
 countdown = pg.mixer.Sound(path.join(sndFolder, 'countdown.wav'))
 countdown.set_volume(0.9)
@@ -74,24 +74,27 @@ class Spritesheet:
         image.blit(self.spritesheet, (0,0), (x,y,width,height))     # extract the image we want and blit to image surface
         return image
 
-spritesheet = Spritesheet(path.join(imgFolder, SPRITESHEET))
 ''' LOAD IN IMAGES '''
+spritesheet = Spritesheet(path.join(imgFolder, SPRITESHEET))
+
 fireball_img = spritesheet.get_image(152, 402, 26, 26)
 enemy_fire_img = spritesheet.get_image(152, 380, 25, 22)
 enemy_img = spritesheet.get_image(0, 380, 152, 117)
-if STYLE == '1':
-    background_img = spritesheet.get_image(0, 0, 253, 380)
-    bombImages = [spritesheet.get_image(199, 380, 16, 25), spritesheet.get_image(215, 380, 16, 25), spritesheet.get_image(231, 380, 22, 32)]
-elif STYLE == '2':
-    background_img = spritesheet.get_image(0, 0, 253, 380)
-    bombImages = [spritesheet.get_image(229, 402, 23, 23), spritesheet.get_image(205, 402, 23, 23), spritesheet.get_image(205, 402, 23, 23)]
+background_img = spritesheet.get_image(0, 0, 253, 380)
+bombImages = [spritesheet.get_image(199, 380, 16, 25), spritesheet.get_image(215, 380, 16, 25), spritesheet.get_image(231, 380, 22, 32)]
 
+spritesheet2 = Spritesheet(path.join(imgFolder, SPRITESHEET_2))
+#mishImages = [spritesheet2.get_image(229, 402, 24, 24), spritesheet2.get_image(205, 402, 24, 24), spritesheet2.get_image(229, 402, 24, 24)]
+maImages = [spritesheet2.get_image(230, 378, 24, 24), spritesheet2.get_image(208, 378, 24, 24), spritesheet2.get_image(208, 378, 24, 24)]
+
+# default player sprite is the classic bomb
+player_sprite = bombImages
 
 explosionImages = []
 for i in range(9):
     filename = 'explosion0{}.png'.format(i)
     img = pg.image.load(path.join(imgFolder, filename)).convert()
-    img.set_colorkey((0,0,0))
+    img.set_colorkey(BLACK)
     explosionImages.append(img)
 
 
@@ -126,8 +129,7 @@ class Button:
 
 class MenuSprite(pg.sprite.Sprite):
     def __init__(self, imgarray, x, y, width, height, updateAnimation):
-        self.x = x
-        self.y = y
+        self.dx = 1.0
         self.width = width
         self.height = height
 
@@ -146,7 +148,7 @@ class MenuSprite(pg.sprite.Sprite):
 
     def update(self):
         self.animate(pg.time.get_ticks())
-        self.move()
+        self.moveLeft()
 
     def animate(self, totalTime):
         if (totalTime - self.oldTime >= self.updateAnimation):
@@ -157,12 +159,15 @@ class MenuSprite(pg.sprite.Sprite):
             self.setImage(self.imgarray[self.imagenum])
             self.oldTime = totalTime
         
-    def move(self):
-        self.x -= 1.0
+    def moveLeft(self):
+        self.rect.x -= self.dx
 
     def setImage(self, newImg):
         self.image = pg.transform.scale(newImg, (self.width, self.height))
         self.image.set_colorkey(WHITE)
 
     def getX(self):
-        return self.x
+        return self.rect.x
+    
+    def getWidth(self):
+        return self.width
