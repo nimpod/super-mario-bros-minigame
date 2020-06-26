@@ -457,7 +457,7 @@ while running:
 
     ''' PLAYER ANIMATION '''
     player1.animate(pygame.time.get_ticks())
-
+    
     update(window, all_sprites)
     render(window, all_sprites)
 
