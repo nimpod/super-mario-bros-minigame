@@ -2,4 +2,4 @@
 
 > Recreation of a minigame on the DS version of Super Mario Bros.
 
-<img src="https://github.com/nimpod/super-mario-bros-minigame/tree/master/res/gameplay.gif" />
+<img src="https://raw.githubusercontent.com/nimpod/super-mario-bros-minigame/master/res/gameplay.gif" />
