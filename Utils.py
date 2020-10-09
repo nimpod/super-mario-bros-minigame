@@ -9,7 +9,7 @@ WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 600
 TITLE = "Danger, Bob-Omb! Danger!"
 VOLUME = 0.9
-SCORES_CSV = 'super-mario-bros-minigame/scores.csv'
+SCORES_CSV = 'scores.csv'
 SPRITESHEET = "spritesheet_1.png"
 SPRITESHEET_2 = "spritesheet_2.png"
 

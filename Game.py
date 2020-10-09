@@ -231,7 +231,7 @@ def display_main_menu(time_started):
         while now - last <= 3300:
             now = pygame.time.get_ticks()
             window.blit(background, (0,0))
-            text_to_screen(window, "Rock Tomlinson Studios presents...", 75, WINDOW_HEIGHT//2.4, 18, WHITE)
+            text_to_screen(window, "Steele Studios presents...", 110, WINDOW_HEIGHT//2.4, 18, WHITE)
             pygame.display.update()
 
     # refresh the background
